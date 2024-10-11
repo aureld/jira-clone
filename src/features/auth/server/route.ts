@@ -1,79 +1,62 @@
-import { Hono } from "hono"
+import { Hono } from "hono";
 import { ID } from "node-appwrite";
-import { deleteCookie, setCookie } from "hono/cookie"
+import { deleteCookie, setCookie } from "hono/cookie";
 
-import { zValidator } from "@hono/zod-validator"
+import { zValidator } from "@hono/zod-validator";
 import { createAdminClient } from "@/lib/appwrite";
+import { sessionMiddleware } from "@/lib/session-middleware";
 
 import { loginSchema, registerSchema } from "../schemas";
 import { AUTH_COOKIE } from "../constants";
 
 const app = new Hono()
-  .post(
-    "/login", 
-    zValidator("json", loginSchema), 
-   async (c) => {
-      const { email, password } = c.req.valid("json")
+  .get("/current", sessionMiddleware, (c) => {
+    const user = c.get("user");
 
-      const { Account: account } = await createAdminClient()
-      
+    return c.json({ data: user });
+  })
+  .post("/login", zValidator("json", loginSchema), async (c) => {
+    const { email, password } = c.req.valid("json");
 
-      const session = await account.createEmailPasswordSession(
-        email,
-        password
-      )
+    const { Account: account } = await createAdminClient();
 
-      setCookie(c, AUTH_COOKIE, session.secret, {
-        path: "/",
-        httpOnly: true,
-        secure: true,
-        sameSite: "strict",
-        maxAge: 60*60*24*30
-      })
+    const session = await account.createEmailPasswordSession(email, password);
 
+    setCookie(c, AUTH_COOKIE, session.secret, {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 30,
+    });
 
-      return c.json({ success: true })
-    }
-  )
-  .post(
-    "/register",
-    zValidator("json", registerSchema), 
-    async (c) => {
-        const { name, email, password } = c.req.valid("json")
+    return c.json({ success: true });
+  })
+  .post("/register", zValidator("json", registerSchema), async (c) => {
+    const { name, email, password } = c.req.valid("json");
 
-        const { Account: account } = await createAdminClient()
-        await account.create(
-          ID.unique(), 
-          email,
-          password,
-          name
-        )
+    const { Account: account } = await createAdminClient();
+    await account.create(ID.unique(), email, password, name);
 
-        const session = await account.createEmailPasswordSession(
-          email,
-          password
-        )
+    const session = await account.createEmailPasswordSession(email, password);
 
-        setCookie(c, AUTH_COOKIE, session.secret, {
-          path: "/",
-          httpOnly: true,
-          secure: true,
-          sameSite: "strict",
-          maxAge: 60*60*24*30
-        })
+    setCookie(c, AUTH_COOKIE, session.secret, {
+      path: "/",
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 30,
+    });
 
-        return c.json({ success: true })
-      }
+    return c.json({ success: true });
+  })
+  .post("/logout", sessionMiddleware, async (c) => {
+    const account = c.get("account");
 
-  )
-  .post(
-    "/logout",
-    async (c) => {
-      deleteCookie(c, AUTH_COOKIE)
+    deleteCookie(c, AUTH_COOKIE);
+    await account.deleteSession("current");
 
-      return c.json({ sucess: true })
-    }
-  )
+    return c.json({ sucess: true });
+  });
 
-
-export default app
+export default app;
