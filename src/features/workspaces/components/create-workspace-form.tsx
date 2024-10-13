@@ -2,9 +2,10 @@
 
 import { z } from "zod";
 import React, { useRef } from "react";
+import { ImageIcon } from "lucide-react";
 import { useForm } from "react-hook-form";
 import Image from "next/image" 
-import { ImageIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,6 +32,8 @@ interface CreateWorkspaceFormProps {
 
 export const CreateWorkspaceForm = ({onCancel}: CreateWorkspaceFormProps) => {
 
+  const router = useRouter()
+  
   const { mutate, isPending } = useCreateWorkspace()
 
   const inputRef = useRef<HTMLInputElement>(null)
@@ -48,9 +51,9 @@ export const CreateWorkspaceForm = ({onCancel}: CreateWorkspaceFormProps) => {
       image: values.image instanceof File ? values.image : "",
     }
     mutate({ form: finalValues }, {
-      onSuccess: () => {
+      onSuccess: ({ data }) => {
         form.reset() 
-        // TODO: redirect to new workspace
+        router.push(`/workspaces/${data.$id}`)
       }
     })
   }
