@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import Image from "next/image" 
 import { useRouter } from "next/navigation";
 
+import { cn } from "@/lib/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { DottedSeparator } from "@/components/dotted-separator";
@@ -159,6 +160,7 @@ export const CreateWorkspaceForm = ({onCancel}: CreateWorkspaceFormProps) => {
                   variant="secondary"
                   onClick={onCancel}
                   disabled={isPending}
+                  className={cn(!onCancel && "invisible" )}
                 >
                   Cancel
                 </Button>
