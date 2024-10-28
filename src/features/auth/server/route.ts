@@ -18,7 +18,7 @@ const app = new Hono()
   .post("/login", zValidator("json", loginSchema), async (c) => {
     const { email, password } = c.req.valid("json");
 
-    const { Account: account } = await createAdminClient();
+    const { account: account } = await createAdminClient();
 
     const session = await account.createEmailPasswordSession(email, password);
 
@@ -35,7 +35,7 @@ const app = new Hono()
   .post("/register", zValidator("json", registerSchema), async (c) => {
     const { name, email, password } = c.req.valid("json");
 
-    const { Account: account } = await createAdminClient();
+    const { account: account } = await createAdminClient();
     await account.create(ID.unique(), email, password, name);
 
     const session = await account.createEmailPasswordSession(email, password);
