@@ -1,6 +1,7 @@
 "use client"
 
-import { PlusIcon } from "lucide-react"
+import { Loader, PlusIcon } from "lucide-react"
+import { useQueryState } from "nuqs"
 
 import { Button } from "@/components/ui/button"
 import { 
@@ -10,13 +11,37 @@ import {
   TabsTrigger
  } from "@/components/ui/tabs"
 import { DottedSeparator } from "@/components/dotted-separator"
+
+import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id"
+
 import { useCreateTaskModal } from "../hooks/use-create-task-modal"
+import { useGetTasks } from "../api/use-get-tasks"
+import { DataFilters } from "./data-filters"
+import { useTaskFilters } from "../hooks/use-task-filters"
 
 export const TaskViewSwitcher = async () => {
+  const [{
+    status,
+    assigneeId,
+    projectId,
+    dueDate
+  }] = useTaskFilters()
+
+  const [view, setView] = useQueryState("task-view", { defaultValue: "table" })
+  const workspaceId = useWorkspaceId()
+  const { data: tasks, isLoading: isLoadingTasks } = useGetTasks({
+    workspaceId,
+    projectId,
+    assigneeId,
+    status,
+    dueDate
+  })
   const { open } = useCreateTaskModal()
 
   return (
     <Tabs
+      defaultValue={view}
+      onValueChange={setView}
       className="flex-1 w-full border rounded-lg"
     >
       <div className="h-full flex flex-col overflow-auto p-4">
@@ -47,19 +72,25 @@ export const TaskViewSwitcher = async () => {
           </Button>
         </div>
         <DottedSeparator className="my-4" />
-          Data filters
+          <DataFilters />
         <DottedSeparator className="my-4" />
-        <>
-          <TabsContent className="mt-0" value="table">
-            Data table
-          </TabsContent>
-          <TabsContent className="mt-0" value="kanban">
-            Data kanban
-          </TabsContent>
-          <TabsContent className="mt-0" value="calendar">
-            Data calendar
-          </TabsContent>
-        </>
+          {isLoadingTasks ? (
+            <div className="w-full border rounded-lg h-[200px] flex flex-col items-center justify-center">
+              <Loader className="size-5 animate-spin text-muted-foreground"/>
+            </div>
+          ) : (
+            <>
+              <TabsContent className="mt-0" value="table">
+                {JSON.stringify(tasks)}
+              </TabsContent>
+              <TabsContent className="mt-0" value="kanban">
+                {JSON.stringify(tasks)}
+              </TabsContent>
+              <TabsContent className="mt-0" value="calendar">
+                {JSON.stringify(tasks)}
+              </TabsContent>
+            </>
+          )}
       </div>
     </Tabs>
   )
