@@ -175,6 +175,7 @@ const app = new Hono()
           status,
           workspaceId,
           projectId,
+          dueDate,
           assigneeId,
           position: newPosition,
         }
