@@ -366,7 +366,6 @@ const app = new Hono()
         return c.json({ error: "Unauthorized" }, 401);
       }
 
-      console.log({});
       const updatedTasks = await Promise.all(
         tasks.map(async (task) => {
           const { $id, status, position } = task;
