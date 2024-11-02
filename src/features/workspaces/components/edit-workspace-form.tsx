@@ -65,7 +65,7 @@ export const EditWorkspaceForm = ({onCancel, initialValues}: EditWorkspaceFormPr
     resolver: zodResolver(updateWorkspaceSchema),
     defaultValues: {
       ...initialValues,
-      name: initialValues.imageUrl ?? ""
+      image: initialValues.imageUrl ?? ""
     }
   })
 
@@ -97,12 +97,9 @@ export const EditWorkspaceForm = ({onCancel, initialValues}: EditWorkspaceFormPr
     const finalValues = {
       ...values,
       image: values.image instanceof File ? values.image : "",
-    }
-    mutate({ form: finalValues, param: { workspaceId: initialValues.$id } }, {
-      onSuccess: () => {
-        form.reset() 
-      }
-    })
+    };
+
+    mutate({ form: finalValues, param: { workspaceId: initialValues.$id } });
   }
 
   

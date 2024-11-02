@@ -55,7 +55,7 @@ export const EditProjectForm = ({onCancel, initialValues}: EditProjectFormProps)
     resolver: zodResolver(updateProjectSchema),
     defaultValues: {
       ...initialValues,
-      name: initialValues.imageUrl ?? ""
+      image: initialValues.imageUrl ?? ""
     }
   })
 
@@ -80,11 +80,7 @@ export const EditProjectForm = ({onCancel, initialValues}: EditProjectFormProps)
       ...values,
       image: values.image instanceof File ? values.image : "",
     }
-    mutate({ form: finalValues, param: { projectId: initialValues.$id } }, {
-      onSuccess: () => {
-        form.reset() 
-      }
-    })
+    mutate({ form: finalValues, param: { projectId: initialValues.$id } })
   }
 
 
