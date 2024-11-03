@@ -16,6 +16,7 @@ import {
 import { DottedSeparator } from "@/components/dotted-separator"
 
 import { useWorkspaceId } from "@/features/workspaces/hooks/use-workspace-id"
+import { useProjectId } from "@/features/projects/hooks/use-project-id"
 
 import { useCreateTaskModal } from "../hooks/use-create-task-modal"
 import { useTaskFilters } from "../hooks/use-task-filters"
@@ -42,9 +43,11 @@ export const TaskViewSwitcher =  ({hideProjectFilter}: TaskViewSwitcherProps) =>
 
   const [view, setView] = useQueryState("task-view", { defaultValue: "table" })
   const workspaceId = useWorkspaceId()
+  const paramprojectId = useProjectId()
+
   const { data: tasks, isLoading: isLoadingTasks } = useGetTasks({
     workspaceId,
-    projectId,
+    projectId: paramprojectId || projectId,
     assigneeId,
     status,
     dueDate
